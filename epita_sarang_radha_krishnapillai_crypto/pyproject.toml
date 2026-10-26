@@ -22,4 +22,4 @@ dev = [
     "pytest>=9.1.1",
 ]
 [project.scripts]
-epita-sarang-cli = "epita_sarang_radha_krishnapillai_crypto.cli:main"
+epita-group2-cli = "epita_sarang_radha_krishnapillai_crypto.cli:main"
