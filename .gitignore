@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+
+# Lab requirements
+*.txt
+dist/
+
+# Environment secrets
+.env
+
+# Build artifacts and test caches
+build/
+wheels/
+*.egg-info/
+.pytest_cache/
