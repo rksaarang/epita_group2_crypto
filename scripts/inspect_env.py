@@ -1,19 +1,66 @@
-import sys
-import os
+"""
+EPITA CM2 Debugging Challenge: API Payload & Batch Aggregator.
+"""
 
-def print_section(title, data):
-    print(f"\n=== {title} ===")
-    if isinstance(data, list):
-        for item in data:
-            print(f"  - {item}")
-    else:
-        print(f"  {data}")
+
+def parse_api_record(raw_entry: str) -> dict:
+    parts = raw_entry.strip().split(",")
+
+    return {
+        "id": parts[0],
+        "entity": parts[1],
+        "volume": float(parts[2]),
+        "status": parts[3],
+        "weight": float(parts[4]),
+    }
+
+
+def compute_weighted_metric(volume: float, weight: float) -> float:
+    return volume * weight
+
+
+def aggregate_telemetry(payload: list[str]) -> dict:
+    total_volume = 0.0
+    successful_entries = 0
+    high_impact_count = 0
+
+    for idx, row in enumerate(payload):
+        record = parse_api_record(row)
+
+        if record["status"] == "SUCCESS":
+            impact = compute_weighted_metric(
+                record["volume"],
+                record["weight"],
+            )
+
+            if impact > 500:
+                high_impact_count += 1
+
+            total_volume += record["volume"]
+            successful_entries += 1
+
+    avg_volume = (
+        total_volume / successful_entries
+        if successful_entries > 0
+        else 0.0
+    )
+
+    return {
+        "successful_entries": successful_entries,
+        "total_volume": total_volume,
+        "avg_volume": avg_volume,
+        "high_impact_count": high_impact_count,
+    }
+
 
 if __name__ == "__main__":
-    print_section("OS Executable Path ($PATH)", os.environ.get("PATH", "").split(os.pathsep)[:4])
-    print_section("Active Python Binary (sys.executable)", sys.executable)
-    print_section("Python Version", sys.version.split()[0])
-    print_section("Virtual Env Prefix (sys.prefix)", sys.prefix)
-    print_section("Base Prefix (sys.base_prefix)", sys.base_prefix)
-    print_section("Is in Virtual Environment?", sys.prefix != sys.base_prefix)
-    print_section("Search Paths for Imports (sys.path)", sys.path[:5])
+    api_payload = [
+        "REC_001,service_alpha,120,SUCCESS,2",
+        "REC_002,service_beta,0,FAILURE,1",
+        "REC_003,service_gamma,450,SUCCESS,3",
+        "REC_004,service_delta,80,SUCCESS,1",
+        "REC_005,service_epsilon,1500,PENDING,4",
+    ]
+
+    result = aggregate_telemetry(api_payload)
+    print("Aggregate Result:", result)
